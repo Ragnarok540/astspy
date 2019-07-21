@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="astspy",
-    version="0.0.1",
+    version="0.0.2",
     author="Edgar Nova",
     author_email="ragnarok540@gmail.com",
     description="Abstract Syntax Tree SPY",
