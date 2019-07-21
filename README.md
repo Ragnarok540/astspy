@@ -1,6 +1,6 @@
 # astspy
 astspy (Abstract Syntax Tree SPY) is an open source command line tool to
-get information from Python source code files.
+extract information from Python source code files.
 
 astspy can be used with Python 3 and 2 code, but make sure to
 analyze files from each version in their respective environments.
@@ -8,8 +8,10 @@ analyze files from each version in their respective environments.
 # Features
 - Print the names of classes and functions found in the file
 - Calculate an aproximation of the number of lines of code of each class
-  or function definition
+  or function definition (sizes)
 - See what functions or classes have docstrings
+- Print the locations of the definitions in the file (line numbers)
+- Get stats from the sizes of the definitions
 
 ## Installation
 
