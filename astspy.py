@@ -1,6 +1,7 @@
 import argparse
 import ast
 from math import sqrt
+import os
 
 class ASTSPY:
     def __init__(self):
@@ -11,7 +12,7 @@ class ASTSPY:
     def read_code(self, path):
         file = open(path)
         self.code = file.read()
-        self.size = sum(1 for line in open(path))
+        self.size = sum(1 for _ in open(path))
         self.tree = ast.parse(self.code)
 
     def _walk(self):
@@ -80,6 +81,9 @@ class ASTSPY:
         list.append("STD DEV " + str(round(std_dev, 2)))
         return list
 
+    # def walk(self):
+
+
 def _analyze(args):
     astspy = ASTSPY()
     astspy.read_code(args.file_name)
@@ -92,6 +96,8 @@ def _analyze(args):
         list = astspy.doc()
     elif args.stats:
         list = astspy.stats()
+    # elif args.walk:
+    #     list = astspy.walk()
     else:
         list = astspy.names()
     astspy.print_list(list)
@@ -111,6 +117,9 @@ group.add_argument("-L", "--locations", action="store_true",
 
 group.add_argument("-s", "--stats", action="store_true",
                    help="""show statistics""")
+
+# group.add_argument("-w", "--walk", action="store_true",
+#                    help="""walk over directory""")
 
 parser = argparse.ArgumentParser(prog="astspy", parents=[parent_parser])
 
