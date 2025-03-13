@@ -1,6 +1,7 @@
 import ast
+from csv import writer
 import os
-from os.path import join, splitext
+from os.path import join, splitext, isdir
 import sys
 
 
@@ -38,17 +39,44 @@ def analyze_file(path: str) -> list[list[str]]:
         res.append(path)
         res.append(str(size))
         res.append(str(key))
+        res.append(type(dictionary[key]).__name__[:-3])
         res.append(dictionary[key].name)
         res.append(str(dictionary[key].end_lineno - key + 1))
         doc_str = ast.get_docstring(dictionary[key])
-        res.append("YES" if doc_str else "NO")
+        res.append("Yes" if doc_str else "No")
 
         result.append(res)
 
     return result
 
 
+# names = file_names('./test_folder_0')
 if __name__ == '__main__':
-    path = sys.argv[1]
-    names = file_names('./test_folder_0')
-    print(analyze_file(names[0]))
+    try:
+        path = sys.argv[1]
+    except IndexError:
+        print("[ERROR] no directory path provided")
+        sys.exit()
+
+    if not isdir(path):
+        print("[ERROR] path provided is not a directory")
+        sys.exit()
+
+    names = file_names(path)
+    result = [['PATH',
+               'LINES',
+               'LOCATION',
+               'TYPE',
+               'NAME',
+               'SIZE',
+               'DOCSTRING']]
+
+    for name in names:
+        res = analyze_file(name)
+        result.extend(res)
+
+    with open('output.csv', mode='w', newline='') as csv_file:
+        csv_writer = writer(csv_file)
+
+        for row in result:
+            csv_writer.writerow(row)
