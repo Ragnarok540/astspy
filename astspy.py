@@ -1,138 +1,81 @@
-import argparse
 import ast
-from math import sqrt
+from csv import writer
 import os
-
-class ASTSPY:
-    def __init__(self):
-        self.code = ""
-        self.size = 0
-        self.tree = None
-
-    def read_code(self, path):
-        file = open(path)
-        self.code = file.read()
-        self.size = sum(1 for _ in open(path))
-        self.tree = ast.parse(self.code)
-
-    def _walk(self):
-        dictionary = {}
-        for node in ast.walk(self.tree):
-            cl = isinstance(node, ast.ClassDef)
-            fn = isinstance(node, ast.FunctionDef)
-            if cl or fn:
-                dictionary[node.lineno] = node
-        return dictionary
-
-    def print_list(self, list):
-        for element in list:
-            print(element)
-
-    def names(self):
-        dictionary = self._walk()
-        list = []
-        for key in sorted(dictionary):
-            if isinstance(dictionary[key], ast.ClassDef):
-                list.append("CLASS " + dictionary[key].name)
-            if isinstance(dictionary[key], ast.FunctionDef):
-                list.append(dictionary[key].name)
-        return list
-
-    def sizes(self):
-        dictionary = self._walk()
-        list = []
-        last_key = 0
-        for key in sorted(dictionary):
-            if last_key > 0:
-                list.append(str(key - last_key))
-            last_key = key
-        list.append(str(self.size - last_key))
-        return list
-
-    def doc(self):
-        dictionary = self._walk()
-        list = []
-        for key in sorted(dictionary):
-            doc_str = ast.get_docstring(dictionary[key])
-            list.append("YES" if doc_str else "NO")
-        return list
-
-    def locations(self):
-        dictionary = self._walk()
-        list = []
-        for key in sorted(dictionary):
-            list.append(key)
-        return list
-
-    def stats(self):
-        list = []
-        sizes = self.sizes()
-        minimum = min(map(int, sizes))
-        list.append("MINIMUM " + str(minimum))
-        avg = sum(map(int, sizes)) / len(sizes)
-        list.append("AVERAGE " + str(round(avg, 2)))
-        maximum = max(map(int, sizes))
-        list.append("MAXIMUM " + str(maximum))
-        sum_variance = 0
-        for x in sizes:
-            sum_variance += (int(x) - avg) * (int(x) - avg)
-        variance = sum_variance / (len(sizes) - 1)
-        std_dev = sqrt(variance)
-        list.append("STD DEV " + str(round(std_dev, 2)))
-        return list
-
-    # def walk(self):
+from os.path import join, splitext, isdir
+import sys
 
 
-def _analyze(args):
-    astspy = ASTSPY()
-    astspy.read_code(args.file_name)
-    list = []
-    if args.lines_of_code:
-        list = astspy.sizes()
-    elif args.locations:
-        list = astspy.locations()
-    elif args.has_docstring:
-        list = astspy.doc()
-    elif args.stats:
-        list = astspy.stats()
-    # elif args.walk:
-    #     list = astspy.walk()
-    else:
-        list = astspy.names()
-    astspy.print_list(list)
+def file_names(directory: str) -> list[str]:
+    result = []
 
-parent_parser = argparse.ArgumentParser(add_help=False)
+    for root, dirs, files in os.walk(directory):
+        for name in files:
+            _, ext = splitext(name)
 
-group = parent_parser.add_mutually_exclusive_group()
+            if ext == '.py':
+                result.append(join(root, name))
 
-group.add_argument("-l", "--lines-of-code", action="store_true",
-                   help="""show sizes in approximate lines of code""")
+    return result
 
-group.add_argument("-d", "--has-docstring", action="store_true",
-                   help="""'YES' if it has, 'NO' if it doesn't""")
 
-group.add_argument("-L", "--locations", action="store_true",
-                   help="""show locations in the file (line numbers)""")
+def analyze_file(path: str) -> list[list[str]]:
+    file = open(path)
+    code = file.read()
+    lines = sum(1 for _ in open(path))
+    tree = ast.parse(code)
+    result = []
+    dictionary = {}
 
-group.add_argument("-s", "--stats", action="store_true",
-                   help="""show statistics""")
+    for node in ast.walk(tree):
+        cl = isinstance(node, ast.ClassDef)
+        fn = isinstance(node, ast.FunctionDef)
+        afn = isinstance(node, ast.AsyncFunctionDef)
 
-# group.add_argument("-w", "--walk", action="store_true",
-#                    help="""walk over directory""")
+        if cl or fn or afn:
+            dictionary[node.lineno] = node
 
-parser = argparse.ArgumentParser(prog="astspy", parents=[parent_parser])
+    for key in sorted(dictionary):
+        res = []
+        res.append(path)
+        res.append(str(lines))
+        res.append(str(key))
+        res.append(type(dictionary[key]).__name__[:-3])
+        res.append(dictionary[key].name)
+        res.append(str(dictionary[key].end_lineno - key + 1))
+        doc = ast.get_docstring(dictionary[key])
+        res.append("Yes" if doc else "No")
 
-parser.add_argument("--version", action="version",
-                    version="%(prog)s version 0.0.3",
-                    help="""print version number on screen and exit""")
+        result.append(res)
 
-parser.add_argument("file_name",
-                    help="""python file to analyze""")
-parser.set_defaults(func=_analyze)
+    return result
 
-args = parser.parse_args()
-args.func(args)
 
-def main():
-    pass
+if __name__ == '__main__':
+    try:
+        path = sys.argv[1]  # './test_folder_0'
+    except IndexError:
+        print("[ERROR] no directory path provided")
+        sys.exit()
+
+    if not isdir(path):
+        print("[ERROR] path provided is not a directory")
+        sys.exit()
+
+    names = file_names(path)
+    result = [['PATH',
+               'LINES',
+               'LOCATION',
+               'TYPE',
+               'NAME',
+               'SIZE',
+               'DOCSTRING']]
+
+    for name in names:
+        res = analyze_file(name)
+        result.extend(res)
+
+    with open('output.csv', mode='w', newline='') as csv_file:
+        csv_writer = writer(csv_file)
+
+        for row in result:
+            csv_writer.writerow(row)
