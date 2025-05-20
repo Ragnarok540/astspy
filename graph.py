@@ -7,14 +7,11 @@ def analyze_file(path: str):
     file = open(path)
     code = file.read()
     tree = ast.parse(code)
-    result = []
     nodes = {}
     sedon = {}
 
     for node in ast.walk(tree):
-        # cl = isinstance(node, ast.ClassDef)
         fn = isinstance(node, ast.FunctionDef)
-        # afn = isinstance(node, ast.AsyncFunctionDef)
 
         if fn:
             nodes[node.lineno] = node
@@ -29,14 +26,16 @@ def analyze_file(path: str):
                 try:
                     end = sedon[node.func.id]
                 except KeyError:
-                    print(f'function "{node.func.id}" in line {node.lineno} not found')
+                    print(f'function "{node.func.id}" in '
+                          f'line {node.lineno} not found')
                     continue
 
                 dot.edge(str(key), str(end))
-                print([a.id for a in node.args])
+                print([a.id for a in node.args])  # parameters
 
     print(dot.source)
-    dot.format = 'png' # svg
+    dot.format = 'png'  # svg
     dot.render(directory='doctest-output', view=True)
+
 
 analyze_file('test_graph.py')
