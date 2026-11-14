@@ -41,6 +41,15 @@ def analyze_file(path: str) -> list[list[str]]:
         res.append(str(key))
         res.append(type(dictionary[key]).__name__[:-3])
         res.append(dictionary[key].name)
+        if isinstance(dictionary[key], ast.ClassDef):
+            res.append('')
+        else:
+            res.append(str([arg.arg for arg in dictionary[key].args.args]))
+        res.append(str([Name.id for Name in dictionary[key].decorator_list]))
+        if isinstance(dictionary[key], ast.ClassDef):
+            res.append(str([Name.id for Name in dictionary[key].bases]))
+        else:
+            res.append('')
         res.append(str(dictionary[key].end_lineno - key + 1))
         doc = ast.get_docstring(dictionary[key])
         res.append("Yes" if doc else "No")
@@ -67,6 +76,9 @@ if __name__ == '__main__':
                'LOCATION',
                'TYPE',
                'NAME',
+               'ARGS',
+               'DECORATORS',
+               'BASES',
                'SIZE',
                'DOCSTRING']]
 

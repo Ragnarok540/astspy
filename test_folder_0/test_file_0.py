@@ -1,19 +1,19 @@
-def hello4():
+def hello_1():
     print("hello")
     print("hello")
     print("hello")
     print("hello")
 
 
-
-def hello():
+def hello_2():
     print("hello")
 
-def hello3():
+
+def hello_3():
     """hello"""
     print("hello")
 
 
-def hello2():
+def hello_4():
     print("hello")
     print("hello")
