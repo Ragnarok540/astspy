@@ -1,7 +1,7 @@
 import ast
-from csv import writer
+import csv
 import os
-from os.path import join, splitext, isdir
+import os.path
 import sys
 
 
@@ -10,10 +10,10 @@ def file_names(directory: str) -> list[str]:
 
     for root, dirs, files in os.walk(directory):
         for name in files:
-            _, ext = splitext(name)
+            _, ext = os.path.splitext(name)
 
             if ext == '.py':
-                result.append(join(root, name))
+                result.append(os.path.join(root, name))
 
     return result
 
@@ -31,7 +31,7 @@ def analyze_file(path: str) -> list[list[str]]:
         fn = isinstance(node, ast.FunctionDef)
         afn = isinstance(node, ast.AsyncFunctionDef)
 
-        if cl or fn or afn:
+        if any([cl, fn, afn]):
             dictionary[node.lineno] = node
 
     for key in sorted(dictionary):
@@ -66,9 +66,18 @@ if __name__ == '__main__':
         print("[ERROR] no directory path provided")
         sys.exit()
 
-    if not isdir(path):
+    if not os.path.isdir(path):
         print("[ERROR] path provided is not a directory")
         sys.exit()
+
+    try:
+        write_csv = sys.argv[2]  # '--write-csv'
+        if write_csv == '--write-csv':
+            stdout = False
+        else:
+            stdout = True
+    except IndexError:
+        stdout = True
 
     names = file_names(path)
     result = [['PATH',
@@ -86,8 +95,13 @@ if __name__ == '__main__':
         res = analyze_file(name)
         result.extend(res)
 
-    with open('output.csv', mode='w', newline='') as csv_file:
-        csv_writer = writer(csv_file)
+    if stdout:
+        output = sys.stdout
+    else:
+        output = open('output.csv', mode='w', newline='')
+
+    with output as csv_file:
+        csv_writer = csv.writer(csv_file)
 
         for row in result:
             csv_writer.writerow(row)

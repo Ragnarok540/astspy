@@ -4,7 +4,8 @@ test_folder_0/test_file_0.py,19,8,Function,hello_2,[],[],,2,No
 test_folder_0/test_file_0.py,19,12,Function,hello_3,[],[],,3,Yes
 test_folder_0/test_file_0.py,19,17,Function,hello_4,[],[],,3,No
 test_folder_0/test_folder_1/test_file_1.py,2,1,Function,hello,[],[],,2,No
-test_folder_0/test_folder_1/test_folder_1_1/test_file_1_1.py,2,1,Function,hello,[],[],,2,No
+test_folder_0/test_folder_1/test_folder_1_1/test_file_1_1.py,14,4,Function,hello,[],[],,2,No
+test_folder_0/test_folder_1/test_folder_1_1/test_file_1_1.py,14,8,AsyncFunction,greet,[],[],,5,No
 test_folder_0/test_folder_2/test_file_2a.py,2,1,Function,hello,"['a', 'b', 'c']",[],,2,No
 test_folder_0/test_folder_2/test_file_2b.py,17,1,Class,TestClassA,,[],[],3,No
 test_folder_0/test_folder_2/test_file_2b.py,17,2,Function,hello,"['self', 'name']",[],,2,No

@@ -15,7 +15,11 @@ extract information from Python source code files.
 # Usage
 
 ```sh
+# write result to stdout
 python3 astspy.py test_folder_0/
+
+# write result to file (output.csv)
+python3 astspy.py test_folder_0/ --write-csv
 ```
 
 <!-- ## Installation
